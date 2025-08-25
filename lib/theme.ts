@@ -50,30 +50,32 @@ const gray: ColorScale = {
   900: '#111827',
 };
 
+// Brand Primary (Indigo-ish) anchored to 600/hover 700 provided
 const primary: ColorScale = {
-  50: '#EFF6FF',
-  100: '#DBEAFE',
-  200: '#BFDBFE',
-  300: '#93C5FD',
-  400: '#60A5FA',
-  500: '#3B82F6',
-  600: '#2563EB',
-  700: '#1D4ED8',
-  800: '#1E40AF',
-  900: '#1E3A8A',
+  50: '#EEF2FF',
+  100: '#E0E7FF',
+  200: '#C7D2FE',
+  300: '#A5B4FC',
+  400: '#818CF8',
+  500: '#6676FF',
+  600: '#2D5BFF', // brand & CTAs
+  700: '#2449CC', // hover/active
+  800: '#1D3AA3',
+  900: '#172D7D',
 };
 
+// Secondary set to Slate scale with 900 as heading color (#0F172A)
 const secondary: ColorScale = {
-  50: '#FFF7ED',
-  100: '#FFEDD5',
-  200: '#FED7AA',
-  300: '#FDBA74',
-  400: '#FB923C',
-  500: '#F97316',
-  600: '#EA580C',
-  700: '#C2410C',
-  800: '#9A3412',
-  900: '#7C2D12',
+  50: '#F8FAFC',
+  100: '#F1F5F9',
+  200: '#E2E8F0',
+  300: '#CBD5E1',
+  400: '#94A3B8',
+  500: '#64748B',
+  600: '#475569',
+  700: '#334155',
+  800: '#1E293B',
+  900: '#0F172A',
 };
 
 const success: ColorScale = {
@@ -121,7 +123,7 @@ const info: ColorScale = {
   200: '#A5F3FC',
   300: '#67E8F9',
   400: '#22D3EE',
-  500: '#06B6D4',
+  500: '#38BDF8',
   600: '#0891B2',
   700: '#0E7490',
   800: '#155E75',
@@ -137,11 +139,11 @@ export const theme: Theme = {
     warning,
     danger,
     info,
-    surface: '#FFFFFF',
-    surfaceAlt: gray[50],
-    text: gray[900],
-    textMuted: gray[500],
-    border: gray[200],
+    surface: '#FFFFFF', // Light surface
+    surfaceAlt: '#F8FAFC', // Sub-surface (cards) in light
+    text: '#0F172A', // Slate 900 for headings/body
+    textMuted: secondary[500],
+    border: '#E2E8F0', // Light border
     overlay: 'rgba(0,0,0,0.5)'
   },
   spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 },
