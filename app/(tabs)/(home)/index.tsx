@@ -16,6 +16,7 @@ import { useMarketplace } from '@/hooks/marketplace-store';
 import ListingCard from '@/components/ListingCard';
 import SearchBar from '@/components/SearchBar';
 import { CarListing } from '@/types/marketplace';
+import { trpc } from '@/lib/trpc';
 
 const { width } = Dimensions.get('window');
 
@@ -23,6 +24,13 @@ export default function HomeScreen() {
   const { listings, currentUser } = useMarketplace();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Test tRPC connection
+  const hiMutation = trpc.example.hi.useMutation();
+  
+  const testBackend = () => {
+    hiMutation.mutate({ name: currentUser?.name || 'User' });
+  };
 
   const featuredListings = listings.filter(l => l.featured);
   const recentListings = [...listings].sort((a, b) => 
@@ -60,6 +68,33 @@ export default function HomeScreen() {
             >
               <Text style={styles.adminButtonText}>Admin Dashboard</Text>
             </TouchableOpacity>
+          )}
+          
+          {/* Test Backend Button */}
+          <TouchableOpacity 
+            style={[styles.adminButton, { backgroundColor: '#10B981', marginTop: 8 }]}
+            onPress={testBackend}
+            disabled={hiMutation.isPending}
+          >
+            <Text style={styles.adminButtonText}>
+              {hiMutation.isPending ? 'Testing...' : 'Test Backend'}
+            </Text>
+          </TouchableOpacity>
+          
+          {hiMutation.data && (
+            <View style={styles.testResult}>
+              <Text style={styles.testResultText}>
+                Backend says: {hiMutation.data.hello} at {hiMutation.data.date.toLocaleTimeString()}
+              </Text>
+            </View>
+          )}
+          
+          {hiMutation.error && (
+            <View style={[styles.testResult, { backgroundColor: '#FEE2E2' }]}>
+              <Text style={[styles.testResultText, { color: '#DC2626' }]}>
+                Error: {hiMutation.error.message}
+              </Text>
+            </View>
           )}
         </View>
 
@@ -270,5 +305,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     marginTop: 4,
+  },
+  testResult: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: '#DCFCE7',
+    borderRadius: 8,
+  },
+  testResultText: {
+    fontSize: 12,
+    color: '#166534',
+    fontWeight: '500',
   },
 });
