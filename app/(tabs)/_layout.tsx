@@ -3,6 +3,7 @@ import { Home, Search, PlusCircle, MessageCircle, User } from "lucide-react-nati
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useMarketplace } from "@/hooks/marketplace-store";
+import theme from "@/lib/theme";
 
 export default function TabLayout() {
   const { conversations } = useMarketplace();
@@ -11,12 +12,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#1E40AF',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: theme.colors.primary[600],
+        tabBarInactiveTintColor: theme.colors.gray[500],
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: 'white',
-          borderTopColor: '#E5E7EB',
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -8,
-    backgroundColor: '#F97316',
+    backgroundColor: theme.colors.primary[600],
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -85,8 +86,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   badgeText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '700' as const,
   },
 });

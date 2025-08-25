@@ -31,7 +31,7 @@ function InputComponent({ label, value, onChangeText, placeholder, helperText, e
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={theme.colors.gray[400]}
+          placeholderTextColor={theme.colors.gray[500]}
           secureTextEntry={secureTextEntry}
           editable={!disabled}
           style={[styles.input, inputStyle]}
@@ -52,7 +52,7 @@ function InputComponent({ label, value, onChangeText, placeholder, helperText, e
 
 const getStyles = (hasError: boolean, focused: boolean, disabled: boolean) => {
   const base = {
-    borderColor: hasError ? theme.colors.danger[400] : focused ? theme.colors.primary[500] : theme.colors.border,
+    borderColor: hasError ? theme.colors.danger[500] : focused ? theme.colors.primary[600] : theme.colors.border,
   } as const;
 
   return StyleSheet.create({
@@ -61,7 +61,7 @@ const getStyles = (hasError: boolean, focused: boolean, disabled: boolean) => {
     inputRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: disabled ? theme.colors.gray[100] : theme.colors.surface,
+      backgroundColor: disabled ? theme.colors.secondary[800] : theme.colors.surfaceAlt,
       borderRadius: theme.radius.lg,
       borderWidth: 1,
       paddingHorizontal: theme.spacing.md,
@@ -70,7 +70,7 @@ const getStyles = (hasError: boolean, focused: boolean, disabled: boolean) => {
     },
     input: { flex: 1, ...theme.typography.body, color: theme.colors.text, paddingVertical: 0 },
     helper: { ...theme.typography.caption, color: theme.colors.textMuted, marginTop: theme.spacing.xs },
-    error: { ...theme.typography.caption, color: theme.colors.danger[600], marginTop: theme.spacing.xs },
+    error: { ...theme.typography.caption, color: theme.colors.danger[400], marginTop: theme.spacing.xs },
   });
 };
 

@@ -12,26 +12,26 @@ export type CardProps = {
 };
 
 function CardComponent({ children, onPress, padded = true, elevated = true, style, testID }: CardProps) {
-  const content = (
-    <View style={[styles.base, elevated ? styles.elevated : null, padded ? styles.padded : null, style]} testID={testID}>
-      {children}
-    </View>
-  );
-
   if (onPress) {
     return (
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={{ borderRadius: theme.radius.lg }}>
-        <View style={{ borderRadius: theme.radius.lg, overflow: 'hidden' }}>{content}</View>
+      <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={{ borderRadius: theme.radius.lg, overflow: 'hidden' }}>
+        <View style={[styles.base, elevated ? styles.elevated : null, padded ? styles.padded : null, style]} testID={testID}>
+          {children}
+        </View>
       </TouchableOpacity>
     );
   }
 
-  return content;
+  return (
+    <View style={[styles.base, elevated ? styles.elevated : null, padded ? styles.padded : null, style]} testID={testID}>
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   base: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.surfaceAlt,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     borderColor: theme.colors.border,

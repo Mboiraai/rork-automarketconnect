@@ -139,26 +139,26 @@ export const theme: Theme = {
     warning,
     danger,
     info,
-    surface: '#FFFFFF', // Light surface
-    surfaceAlt: '#F8FAFC', // Sub-surface (cards) in light
-    text: '#0F172A', // Slate 900 for headings/body
-    textMuted: secondary[500],
-    border: '#E2E8F0', // Light border
-    overlay: 'rgba(0,0,0,0.5)'
+    surface: '#0B1220',
+    surfaceAlt: '#101726',
+    text: '#FFFFFF',
+    textMuted: gray[400],
+    border: '#1E293B',
+    overlay: 'rgba(0,0,0,0.6)'
   },
   spacing: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 },
   radius: { sm: 6, md: 8, lg: 12, xl: 16, full: 999 },
   typography: {
-    display: { fontSize: 28, fontWeight: '800' as const },
-    heading: { fontSize: 20, fontWeight: '700' as const },
-    title: { fontSize: 16, fontWeight: '600' as const },
-    body: { fontSize: 14, fontWeight: '400' as const },
-    caption: { fontSize: 12, fontWeight: '400' as const },
+    display: { fontSize: 28, fontWeight: '800' as const, color: '#FFFFFF' },
+    heading: { fontSize: 20, fontWeight: '700' as const, color: '#FFFFFF' },
+    title: { fontSize: 16, fontWeight: '600' as const, color: '#FFFFFF' },
+    body: { fontSize: 14, fontWeight: '400' as const, color: '#FFFFFF' },
+    caption: { fontSize: 12, fontWeight: '400' as const, color: gray[400] },
   },
   shadows: {
-    sm: { shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
-    md: { shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
-    lg: { shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
+    sm: { shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+    md: { shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
+    lg: { shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
   },
   motion: { fast: 150, normal: 250, slow: 350 },
 };

@@ -64,19 +64,19 @@ const getStyles = (variant: ButtonVariant, size: ButtonSize, disabled: boolean, 
   let text: TextStyle = { ...textBase };
 
   if (variant === 'primary') {
-    button = { ...button, backgroundColor: disabled ? theme.colors.primary[300] : theme.colors.primary[700] };
+    button = { ...button, backgroundColor: disabled ? theme.colors.primary[700] : theme.colors.primary[600] };
     text = { ...text, color: '#fff' };
   } else if (variant === 'secondary') {
-    button = { ...button, backgroundColor: disabled ? theme.colors.secondary[300] : theme.colors.secondary[500] };
+    button = { ...button, backgroundColor: disabled ? theme.colors.secondary[800] : theme.colors.secondary[700] };
     text = { ...text, color: '#fff' };
   } else if (variant === 'outline') {
-    button = { ...button, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.primary[300] };
-    text = { ...text, color: theme.colors.primary[700] };
+    button = { ...button, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.border };
+    text = { ...text, color: theme.colors.text };
   } else if (variant === 'ghost') {
-    button = { ...button, backgroundColor: Platform.OS === 'web' ? 'transparent' : 'rgba(59,130,246,0.1)' };
-    text = { ...text, color: theme.colors.primary[700] };
+    button = { ...button, backgroundColor: Platform.OS === 'web' ? 'transparent' : 'rgba(45,91,255,0.08)' };
+    text = { ...text, color: theme.colors.primary[400] };
   } else if (variant === 'danger') {
-    button = { ...button, backgroundColor: disabled ? theme.colors.danger[300] : theme.colors.danger[600] };
+    button = { ...button, backgroundColor: disabled ? theme.colors.danger[700] : theme.colors.danger[600] };
     text = { ...text, color: '#fff' };
   }
 
