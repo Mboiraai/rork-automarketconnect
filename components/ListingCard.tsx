@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { Heart, MapPin, Calendar, Eye } from 'lucide-react-native';
 import { Listing, CarListing } from '@/types/marketplace';
 import { useMarketplace } from '@/hooks/marketplace-store';
+import theme from '@/lib/theme';
+import Card from '@/components/ui/Card';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 36) / 2;
@@ -13,7 +15,7 @@ interface ListingCardProps {
   variant?: 'grid' | 'list';
 }
 
-export default function ListingCard({ listing, onPress, variant = 'grid' }: ListingCardProps) {
+function ListingCardComponent({ listing, onPress, variant = 'grid' }: ListingCardProps) {
   const { favorites, toggleFavorite } = useMarketplace();
   const isFavorite = favorites.includes(listing.id);
   const isCar = listing.type === 'car';
@@ -33,7 +35,7 @@ export default function ListingCard({ listing, onPress, variant = 'grid' }: List
 
   if (variant === 'list') {
     return (
-      <TouchableOpacity style={styles.listCard} onPress={onPress} testID={`listing-${listing.id}`}>
+      <Card onPress={onPress} padded={false} style={styles.listCard} testID={`listing-${listing.id}`}>
         <Image source={{ uri: listing.images[0] }} style={styles.listImage} />
         <View style={styles.listContent}>
           <View style={styles.listHeader}>
@@ -76,12 +78,12 @@ export default function ListingCard({ listing, onPress, variant = 'grid' }: List
             </View>
           </View>
         </View>
-      </TouchableOpacity>
+      </Card>
     );
   }
 
   return (
-    <TouchableOpacity style={styles.gridCard} onPress={onPress} testID={`listing-${listing.id}`}>
+    <Card onPress={onPress} padded={false} style={[styles.gridCard, { width: CARD_WIDTH }]} testID={`listing-${listing.id}`}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: listing.images[0] }} style={styles.gridImage} />
         <TouchableOpacity 
@@ -117,23 +119,19 @@ export default function ListingCard({ listing, onPress, variant = 'grid' }: List
           <Text style={styles.gridLocationText}>{listing.location}</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
 }
+
+export default memo(ListingCardComponent);
 
 const styles = StyleSheet.create({
   // Grid variant styles
   gridCard: {
-    width: CARD_WIDTH,
-    backgroundColor: 'white',
-    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
     overflow: 'hidden',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: theme.spacing.md,
   },
   imageContainer: {
     position: 'relative',
@@ -141,7 +139,7 @@ const styles = StyleSheet.create({
   gridImage: {
     width: '100%',
     height: CARD_WIDTH * 0.75,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.gray[100],
   },
   gridFavoriteButton: {
     position: 'absolute',
@@ -155,67 +153,60 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: '#F97316',
+    backgroundColor: theme.colors.secondary[500],
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: theme.radius.sm,
   },
   featuredText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 10,
     fontWeight: '600',
   },
   gridContent: {
-    padding: 12,
+    padding: theme.spacing.md,
   },
   gridTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 4,
+    ...theme.typography.title,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
   },
   gridPrice: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1E40AF',
-    marginBottom: 4,
+    ...theme.typography.heading,
+    color: theme.colors.primary[800],
+    marginBottom: theme.spacing.xs,
   },
   gridMeta: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 4,
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
+    marginBottom: theme.spacing.xs,
   },
   gridLocation: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   gridLocationText: {
-    fontSize: 12,
-    color: '#6B7280',
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
     marginLeft: 4,
   },
   
   // List variant styles
   listCard: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
     overflow: 'hidden',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: theme.spacing.sm,
   },
   listImage: {
     width: 120,
     height: 120,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.gray[100],
   },
   listContent: {
     flex: 1,
-    padding: 12,
+    padding: theme.spacing.md,
   },
   listHeader: {
     flexDirection: 'row',
@@ -225,26 +216,24 @@ const styles = StyleSheet.create({
   },
   listTitle: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
+    ...theme.typography.title,
+    color: theme.colors.text,
     marginRight: 8,
   },
   favoriteButton: {
     padding: 4,
   },
   listPrice: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1E40AF',
+    ...theme.typography.heading,
+    color: theme.colors.primary[800],
     marginBottom: 6,
   },
   listMeta: {
     marginBottom: 8,
   },
   listMetaText: {
-    fontSize: 12,
-    color: '#6B7280',
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
     marginBottom: 2,
   },
   listLocation: {
@@ -252,8 +241,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listLocationText: {
-    fontSize: 12,
-    color: '#6B7280',
+    ...theme.typography.caption,
+    color: theme.colors.textMuted,
     marginLeft: 4,
   },
   listFooter: {
@@ -267,7 +256,7 @@ const styles = StyleSheet.create({
   },
   listStatText: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: theme.colors.gray[400],
     marginLeft: 4,
   },
 });
