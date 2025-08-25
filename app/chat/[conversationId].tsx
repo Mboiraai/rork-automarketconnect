@@ -17,18 +17,23 @@ import { useConversation, useMarketplace } from '@/hooks/marketplace-store';
 export default function ChatScreen() {
   const { conversationId } = useLocalSearchParams();
   const { conversation, messages } = useConversation(conversationId as string);
-  const { sendMessage, currentUser } = useMarketplace();
+  const { sendMessage, currentUser, markConversationRead } = useMarketplace();
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlatList>(null);
 
   const otherParticipant = conversation?.participants.find(p => p.id !== currentUser?.id);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, [messages]);
+
+  useEffect(() => {
+    if (conversation?.id) {
+      markConversationRead(conversation.id);
+    }
+  }, [conversation?.id, markConversationRead]);
 
   const handleSend = () => {
     if (!inputText.trim() || !conversation || !otherParticipant) return;
@@ -126,7 +131,7 @@ export default function ChatScreen() {
 
         {/* Input */}
         <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.attachButton}>
+          <TouchableOpacity style={styles.attachButton} testID="attach-button">
             <Paperclip size={20} color="#6B7280" />
           </TouchableOpacity>
           <TextInput
@@ -136,12 +141,12 @@ export default function ChatScreen() {
             placeholder="Type a message..."
             placeholderTextColor="#9CA3AF"
             multiline
-            maxHeight={100}
           />
           <TouchableOpacity 
             style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
             onPress={handleSend}
             disabled={!inputText.trim()}
+            testID="send-button"
           >
             <Send size={20} color={inputText.trim() ? 'white' : '#9CA3AF'} />
           </TouchableOpacity>

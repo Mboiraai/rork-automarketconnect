@@ -1,21 +1,21 @@
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect, useMemo } from 'react';
-import { 
-  User, 
-  Listing, 
-  CarListing, 
-  PartListing, 
-  Message, 
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  User,
+  Listing,
+  CarListing,
+  PartListing,
+  Message,
   Conversation,
-  SearchFilters 
+  SearchFilters,
 } from '@/types/marketplace';
-import { 
-  mockUsers, 
-  mockCarListings, 
-  mockPartListings, 
-  mockMessages, 
-  mockConversations 
+import {
+  mockUsers,
+  mockCarListings,
+  mockPartListings,
+  mockMessages,
+  mockConversations,
 } from '@/mocks/marketplace-data';
 
 interface MarketplaceState {
@@ -30,7 +30,7 @@ interface MarketplaceState {
 
 export const [MarketplaceProvider, useMarketplace] = createContextHook(() => {
   const [state, setState] = useState<MarketplaceState>({
-    currentUser: mockUsers[3], // Current user with admin privileges
+    currentUser: mockUsers[3],
     listings: [...mockCarListings, ...mockPartListings] as Listing[],
     conversations: mockConversations,
     messages: mockMessages,
@@ -39,7 +39,6 @@ export const [MarketplaceProvider, useMarketplace] = createContextHook(() => {
     isLoading: false,
   });
 
-  // Load persisted data
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -48,129 +47,175 @@ export const [MarketplaceProvider, useMarketplace] = createContextHook(() => {
           AsyncStorage.getItem('userListings'),
         ]);
 
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           favorites: favoritesData ? JSON.parse(favoritesData) : [],
-          listings: userListings 
-            ? [...JSON.parse(userListings), ...mockCarListings, ...mockPartListings]
-            : [...mockCarListings, ...mockPartListings],
+          listings: userListings
+            ? ([...JSON.parse(userListings), ...mockCarListings, ...mockPartListings] as Listing[])
+            : ([...mockCarListings, ...mockPartListings] as Listing[]),
         }));
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('loadData error', error);
       }
     };
     loadData();
   }, []);
 
-  const toggleFavorite = async (listingId: string) => {
+  const toggleFavorite = useCallback(async (listingId: string) => {
     const newFavorites = state.favorites.includes(listingId)
-      ? state.favorites.filter(id => id !== listingId)
+      ? state.favorites.filter((id) => id !== listingId)
       : [...state.favorites, listingId];
-    
-    setState(prev => ({ ...prev, favorites: newFavorites }));
+
+    setState((prev) => ({ ...prev, favorites: newFavorites }));
     await AsyncStorage.setItem('favorites', JSON.stringify(newFavorites));
-  };
+  }, [state.favorites]);
 
-  const addListing = async (listing: Omit<Listing, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'favorites' | 'seller'>) => {
-    const newListing: Listing = {
-      ...listing,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      views: 0,
-      favorites: 0,
-      seller: state.currentUser!,
-      sellerId: state.currentUser!.id,
-    } as Listing;
+  const addListing = useCallback(
+    async (
+      listing: Omit<
+        Listing,
+        'id' | 'createdAt' | 'updatedAt' | 'views' | 'favorites' | 'seller'
+      >,
+    ) => {
+      const newListing: Listing = {
+        ...listing,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        views: 0,
+        favorites: 0,
+        seller: state.currentUser!,
+        sellerId: state.currentUser!.id,
+      } as Listing;
 
-    const updatedListings = [newListing, ...state.listings];
-    setState(prev => ({ ...prev, listings: updatedListings }));
-    
-    // Save user listings
-    const userListings = updatedListings.filter(l => l.sellerId === state.currentUser?.id);
-    await AsyncStorage.setItem('userListings', JSON.stringify(userListings));
-    
-    return newListing;
-  };
+      const updatedListings = [newListing, ...state.listings] as Listing[];
+      setState((prev) => ({ ...prev, listings: updatedListings }));
 
-  const updateListing = async (listingId: string, updates: Partial<Listing>) => {
-    const updatedListings = state.listings.map(listing =>
-      listing.id === listingId
-        ? { ...listing, ...updates, updatedAt: new Date().toISOString() }
-        : listing
-    );
-    
-    setState(prev => ({ ...prev, listings: updatedListings }));
-    
-    const userListings = updatedListings.filter(l => l.sellerId === state.currentUser?.id);
-    await AsyncStorage.setItem('userListings', JSON.stringify(userListings));
-  };
+      const userListings = updatedListings.filter((l) => l.sellerId === state.currentUser?.id);
+      await AsyncStorage.setItem('userListings', JSON.stringify(userListings));
 
-  const deleteListing = async (listingId: string) => {
-    const updatedListings = state.listings.filter(l => l.id !== listingId);
-    setState(prev => ({ ...prev, listings: updatedListings }));
-    
-    const userListings = updatedListings.filter(l => l.sellerId === state.currentUser?.id);
-    await AsyncStorage.setItem('userListings', JSON.stringify(userListings));
-  };
+      return newListing;
+    },
+    [state.currentUser, state.listings],
+  );
 
-  const sendMessage = (conversationId: string, text: string, receiverId: string, listingId?: string) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      conversationId,
-      senderId: state.currentUser!.id,
-      receiverId,
-      text,
-      timestamp: new Date().toISOString(),
-      read: false,
-      listingId,
-    };
+  const updateListing = useCallback(
+    async (listingId: string, updates: Partial<Listing>) => {
+      const updatedListings: Listing[] = state.listings.map((listing) => {
+        if (listing.id !== listingId) return listing;
+        const common = { updatedAt: new Date().toISOString() };
+        if (listing.type === 'car') {
+          const car = listing as CarListing;
+          return { ...car, ...(updates as Partial<CarListing>), ...common } as Listing;
+        }
+        const part = listing as PartListing;
+        return { ...part, ...(updates as Partial<PartListing>), ...common } as Listing;
+      });
 
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, newMessage],
-      conversations: prev.conversations.map(conv =>
-        conv.id === conversationId
-          ? { ...conv, lastMessage: newMessage, unreadCount: conv.unreadCount + 1 }
-          : conv
-      ),
-    }));
-  };
+      setState((prev) => ({ ...prev, listings: updatedListings }));
 
-  const createConversation = (participant: User, listing?: Listing): Conversation => {
-    const existingConv = state.conversations.find(
-      c => c.participants.some(p => p.id === participant.id) && c.listing?.id === listing?.id
-    );
-    
-    if (existingConv) return existingConv;
+      const userListings = updatedListings.filter((l) => l.sellerId === state.currentUser?.id);
+      await AsyncStorage.setItem('userListings', JSON.stringify(userListings));
+    },
+    [state.listings, state.currentUser?.id],
+  );
 
-    const newConversation: Conversation = {
-      id: Date.now().toString(),
-      participants: [state.currentUser!, participant],
-      lastMessage: {
-        id: '',
-        conversationId: '',
+  const deleteListing = useCallback(
+    async (listingId: string) => {
+      const updatedListings: Listing[] = state.listings.filter((l) => l.id !== listingId);
+      setState((prev) => ({ ...prev, listings: updatedListings }));
+
+      const userListings = updatedListings.filter((l) => l.sellerId === state.currentUser?.id);
+      await AsyncStorage.setItem('userListings', JSON.stringify(userListings));
+    },
+    [state.listings, state.currentUser?.id],
+  );
+
+  const sendMessage = useCallback(
+    (conversationId: string, text: string, receiverId: string, listingId?: string) => {
+      console.log('sendMessage', { conversationId, text, receiverId, listingId });
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        conversationId,
         senderId: state.currentUser!.id,
-        receiverId: participant.id,
-        text: `Hi, I'm interested in ${listing?.title || 'your listing'}`,
+        receiverId,
+        text,
         timestamp: new Date().toISOString(),
         read: false,
-      },
-      unreadCount: 0,
-      listing,
-    };
+        listingId,
+      };
 
-    setState(prev => ({
-      ...prev,
-      conversations: [newConversation, ...prev.conversations],
-    }));
+      setState((prev) => ({
+        ...prev,
+        messages: [...prev.messages, newMessage],
+        conversations: prev.conversations.map((conv) =>
+          conv.id === conversationId
+            ? {
+                ...conv,
+                lastMessage: newMessage,
+                unreadCount:
+                  newMessage.senderId === state.currentUser!.id ? conv.unreadCount : conv.unreadCount + 1,
+              }
+            : conv,
+        ),
+      }));
+    },
+    [state.currentUser?.id],
+  );
 
-    return newConversation;
-  };
+  const markConversationRead = useCallback(
+    (conversationId: string) => {
+      const currentUserId = state.currentUser?.id;
+      if (!currentUserId) return;
 
-  const setSearchFilters = (filters: SearchFilters) => {
-    setState(prev => ({ ...prev, searchFilters: filters }));
-  };
+      setState((prev) => ({
+        ...prev,
+        messages: prev.messages.map((m) =>
+          m.conversationId === conversationId && m.receiverId === currentUserId ? { ...m, read: true } : m,
+        ),
+        conversations: prev.conversations.map((c) => (c.id === conversationId ? { ...c, unreadCount: 0 } : c)),
+      }));
+    },
+    [state.currentUser?.id],
+  );
+
+  const createConversation = useCallback(
+    (participant: User, listing?: Listing): Conversation => {
+      const existingConv = state.conversations.find(
+        (c) => c.participants.some((p) => p.id === participant.id) && c.listing?.id === listing?.id,
+      );
+
+      if (existingConv) return existingConv;
+
+      const newConversation: Conversation = {
+        id: Date.now().toString(),
+        participants: [state.currentUser!, participant],
+        lastMessage: {
+          id: '',
+          conversationId: '',
+          senderId: state.currentUser!.id,
+          receiverId: participant.id,
+          text: `Hi, I'm interested in ${listing?.title || 'your listing'}`,
+          timestamp: new Date().toISOString(),
+          read: false,
+        },
+        unreadCount: 0,
+        listing,
+      };
+
+      setState((prev) => ({
+        ...prev,
+        conversations: [newConversation, ...prev.conversations],
+      }));
+
+      return newConversation;
+    },
+    [state.conversations, state.currentUser],
+  );
+
+  const setSearchFilters = useCallback((filters: SearchFilters) => {
+    setState((prev) => ({ ...prev, searchFilters: filters }));
+  }, []);
 
   const getFilteredListings = useMemo(() => {
     let filtered = [...state.listings];
@@ -178,35 +223,32 @@ export const [MarketplaceProvider, useMarketplace] = createContextHook(() => {
 
     if (filters.query) {
       const query = filters.query.toLowerCase();
-      filtered = filtered.filter(l => 
-        l.title.toLowerCase().includes(query) ||
-        l.description.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (l) => l.title.toLowerCase().includes(query) || l.description.toLowerCase().includes(query),
       );
     }
 
     if (filters.type && filters.type !== 'all') {
-      filtered = filtered.filter(l => l.type === filters.type);
+      filtered = filtered.filter((l) => l.type === filters.type);
     }
 
     if (filters.minPrice) {
-      filtered = filtered.filter(l => l.price >= filters.minPrice!);
+      filtered = filtered.filter((l) => l.price >= (filters.minPrice as number));
     }
 
     if (filters.maxPrice) {
-      filtered = filtered.filter(l => l.price <= filters.maxPrice!);
+      filtered = filtered.filter((l) => l.price <= (filters.maxPrice as number));
     }
 
-    if (filters.make && filtered.some(l => l.type === 'car')) {
-      filtered = filtered.filter(l => 
-        l.type !== 'car' || (l as CarListing).make === filters.make
-      );
+    if (filters.make && filtered.some((l) => l.type === 'car')) {
+      filtered = filtered.filter((l) => l.type !== 'car' || (l as CarListing).make === filters.make);
     }
 
-    if (filters.condition) {
-      filtered = filtered.filter(l => l.condition === filters.condition);
+    if ((filters as Partial<CarListing | PartListing>).condition) {
+      const cond = (filters as Partial<CarListing | PartListing>).condition as string;
+      filtered = filtered.filter((l) => (l as CarListing | PartListing).condition === cond);
     }
 
-    // Sorting
     if (filters.sortBy) {
       switch (filters.sortBy) {
         case 'price-asc':
@@ -224,7 +266,7 @@ export const [MarketplaceProvider, useMarketplace] = createContextHook(() => {
       }
     }
 
-    return filtered;
+    return filtered as Listing[];
   }, [state.listings, state.searchFilters]);
 
   return {
@@ -234,32 +276,38 @@ export const [MarketplaceProvider, useMarketplace] = createContextHook(() => {
     updateListing,
     deleteListing,
     sendMessage,
+    markConversationRead,
     createConversation,
     setSearchFilters,
     getFilteredListings,
   };
 });
 
-// Helper hooks
 export function useFavorites() {
   const { favorites, listings } = useMarketplace();
-  return useMemo(
-    () => listings.filter(l => favorites.includes(l.id)),
-    [favorites, listings]
-  );
+  return useMemo(() => listings.filter((l) => favorites.includes(l.id)), [favorites, listings]);
 }
 
 export function useUserListings() {
   const { currentUser, listings } = useMarketplace();
   return useMemo(
-    () => listings.filter(l => l.sellerId === currentUser?.id),
-    [currentUser, listings]
+    () => listings.filter((l) => l.sellerId === currentUser?.id),
+    [currentUser, listings],
   );
 }
 
 export function useConversation(conversationId: string) {
   const { conversations, messages } = useMarketplace();
-  const conversation = conversations.find(c => c.id === conversationId);
-  const conversationMessages = messages.filter(m => m.conversationId === conversationId);
+  const conversation = conversations.find((c) => c.id === conversationId);
+  const conversationMessages = useMemo(
+    () =>
+      messages
+        .filter((m) => m.conversationId === conversationId)
+        .slice()
+        .sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        ),
+    [messages, conversationId],
+  );
   return { conversation, messages: conversationMessages };
 }

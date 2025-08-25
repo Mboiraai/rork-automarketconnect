@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -13,7 +13,7 @@ import { MessageCircle } from 'lucide-react-native';
 import { useMarketplace } from '@/hooks/marketplace-store';
 
 export default function MessagesScreen() {
-  const { conversations, currentUser } = useMarketplace();
+  const { conversations, currentUser, markConversationRead } = useMarketplace();
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -90,6 +90,9 @@ export default function MessagesScreen() {
         keyExtractor={(item) => item.id}
         renderItem={renderConversation}
         contentContainerStyle={styles.listContent}
+        onRefresh={() => {}}
+        refreshing={false}
+        testID="conversations-list"
       />
     </SafeAreaView>
   );
